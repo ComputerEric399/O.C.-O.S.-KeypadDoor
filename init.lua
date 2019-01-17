@@ -13,8 +13,8 @@ end
 if daif ~= nil then
   if dait ~= nil then
     for file in daif.list() do
-      from = daif.open("/Files/"..file)
-      to dait.open("/"..file)
+      filefrom = daif.open("/Files/"..file)
+      fileto dait.open("/"..file)
       while true do
         thing = daif.read(from,1)
         if thing == nil then break end
