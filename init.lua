@@ -1,27 +1,27 @@
-for _, v in component.list("filesystem") do
-  if not component.proxy(v).exists("/notme") then
-    dait = v
+for a, _ in component.list("filesystem") do
+  if not component.proxy(a).exists("/notme") then
+    dcit = a
     break
   end
 end
-for _, v in component.list("filesystem") do
-  if component.proxy(v).exists("/notme") then
-    daif = v
+for a, _ in component.list("filesystem") do
+  if component.proxy(a).exists("/notme") then
+    dcif = a
     break
   end
 end
-if daif ~= nil then
-  if dait ~= nil then
-    for file in daif.list() do
-      filefrom = daif.open("/Files/"..file)
-      fileto dait.open("/"..file)
+if dcif ~= nil then
+  if dcit ~= nil then
+    for filename in dcif.list() do
+      filecopyfrom = dcif.open("/Files/"..filename)
+      filecopyto = dcit.open("/"..filename)
       while true do
-        thing = daif.read(from,1)
+        thing = dcif.read(filecopyfrom,1)
         if thing == nil then break end
-        dait.write(to,thing)
+        dcit.write(filecopyto,thing)
       end
-      daif.close(from)
-      dait.close(to)
+      dcif.close(filecopyfrom)
+      dcit.close(filecopyto)
     end
   else
     error("No Other Drive Found")  
