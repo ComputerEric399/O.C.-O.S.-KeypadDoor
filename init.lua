@@ -10,7 +10,7 @@ for _, v in component.list("filesystem") do
     break
   end
 end
-if daif ~= then
+if daif ~= nil then
   if dait ~= nil then
     for file in daif.list() do
       from = daif.open("/Files/"..file)
