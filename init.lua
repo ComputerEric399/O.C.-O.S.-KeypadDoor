@@ -58,4 +58,4 @@ end
 --Restart
 computer.setBootAddress(diskDriveAddress)
 computer.beep()
-computer.shutdown()
+computer.shutdown(true)
