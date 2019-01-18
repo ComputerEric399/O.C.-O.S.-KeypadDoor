@@ -1,6 +1,15 @@
+local component_invoke = component.invoke
+local function boot_invoke(address, method, ...)
+  local result = table.pack(pcall(component_invoke, address, method, ...))
+  if not result[1] then
+    return nil, result[2]
+  else
+    return table.unpack(result, 2, result.n)
+  end
+
 --find an other drive to install to
 for a, _ in component.list("filesystem") do
-  if not component.proxy(a).exists("/notme") then
+  if not boot_invoke(component.proxy(a),"exists","/notme") then
     dcit = component.proxy(a)
     computer.setBootAddress(a)
     break
@@ -9,7 +18,7 @@ end
 
 --find myself the floppy
 for a, _ in component.list("filesystem") do
-  if component.proxy(a).exists("/notme") then
+  if boot_invoke(component.proxy(a),"exists","/notme") then
     dcif = component.proxy(a)
     break
   end
