@@ -1,7 +1,8 @@
 password = "5231"
 dc = component.proxy(component.list("os_doorcontroller")())
 kp = component.proxy(component.list("os_keypad")())
-if dc.isOpen() then dc.toggle() end
+dc.close()
+dc.setPassword("5231")
 kp.setDisplay("")
 function sleep(time)
   til = computer.uptime() + time
@@ -17,13 +18,13 @@ while true do
       if entered == password then
         entered = ""
         kp.setDisplay("CORRECT",2)
-        if not dc.isOpen() then dc.toggle() end
+        dc.open("5231")
         computer.beep(600,.1)
         sleep(.1)
         computer.beep(600,.1)
         sleep(2)
         kp.setDisplay("")
-        dc.toggle()
+        dc.close("5231")
       else
         entered = ""
         kp.setDisplay("ERROR",4)
