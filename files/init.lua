@@ -1,7 +1,7 @@
 password = "5231"
 dc = component.proxy(component.list("os_doorcontroller")())
 kp = component.proxy(component.list("os_keypad")())
-if dc.isOpen then dc.toggle() end
+if dc.isOpen() then dc.toggle() end
 kp.setDisplay("")
 function sleep(time)
   til = computer.uptime() + time
