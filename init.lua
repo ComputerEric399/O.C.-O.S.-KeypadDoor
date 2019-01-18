@@ -1,3 +1,7 @@
+--YEET
+--The 'YEET' on line one is an identifier so don't delete it!
+
+--Set up boot_invoke to call components.
 local component_invoke = component.invoke
 local function boot_invoke(address, method, ...)
   local result = table.pack(pcall(component_invoke, address, method, ...))
@@ -6,59 +10,52 @@ local function boot_invoke(address, method, ...)
   else
     return table.unpack(result, 2, result.n)
   end
+end
 
---find an other drive to install to
+--Find the floppy disk that the program is installing from.
+local floppyAddress
 for a, _ in component.list("filesystem") do
-  if not boot_invoke(component.proxy(a),"exists","/notme") then
-    dcit = component.proxy(a)
-    computer.setBootAddress(a)
+  local initFile = boot_invoke(a,"open","init.lua")
+  if boot_invoke(a,"read", initFile,6) == "--YEET" then
+    floppyAddress = a
     break
   end
 end
+if floppyAddress == nil then error("Can't find installation floppy!") end
 
---find myself the floppy
+--Find the disk drive address the program is installing to.
+local diskDriveAddress
 for a, _ in component.list("filesystem") do
-  if boot_invoke(component.proxy(a),"exists","/notme") then
-    dcif = component.proxy(a)
-    break
+  if a ~= floppyAddress and a ~= computer.tmpAddress() then
+    diskDriveAddress = a
   end
 end
+if diskDriveAddress == nil then error("Can't fine disk drive to install to!") end
 
---log all components
-log = dcif.open("/log.txt","w")
-for k, v in pairs(component.list()) do
-  label = ""
-  if v == "filesystem" then label = " || "..component.proxy(k).getLabel() end
-  dcif.write(log,k.."="..v..label.."\n")
+--Log the components
+local logFile = boot_invoke(floppyAddress,"open","/log.txt","w")
+for a, t in component.list() do
+  boot_invoke(floppyAddress,"write",logFile,a.." | "..t.."\n")
 end
-dcif.close(log)
+boot_invoke(floppyAddress,"write",logFile,"\nFLOPPY --> "..floppyAddress.."\n")
+if diskDriveAddress ~= nil then boot_invoke(floppyAddress,"write",logFile,"DISKDRIVE --> "..diskDriveAddress) end
+boot_invoke(floppyAddress,"close",logFile)
 
---move all files from floppy to drive
-if dcit ~= nil then
-  if dcif ~= nil then
-    for _, filename in pairs(dcif.list("/Files/")) do
-      filecopyfrom = dcif.open("/Files/"..filename,"r")
-      data = ""
-      while true do
-        thing = dcif.read(filecopyfrom,1)
-        if thing == nil then
-          break
-        else
-          data = data..thing
-        end
-      end
-      dcif.close(filecopyfrom)
-      filecopyto = dcit.open("/"..filename,"w")
-      dcit.write(filecopyto,data)
-      dcit.close(filecopyto)
-    end
-  else
-    error()  
-  end
-else
-  error("Can't Install")
+--Copy/Install the files
+for _, filename in pairs(boot_invoke(floppyAddress,"list","/files/")) do
+  local handle = boot_invoke(floppyAddress,"open","/files/"..filename)
+  local buffer = ""
+  repeat
+    data = boot_invoke(floppyAddress,"read",handle,math.huge)
+    buffer = buffer..(data or "")
+  until not data
+  boot_invoke(floppyAddress,"close",handle)
+  handle = boot_invoke(diskDriveAddress,"open","/"..filename,"w")
+  boot_invoke(diskDriveAddress,"write",handle,buffer)
+  boot_invoke(diskDriveAddress,"close",handle)
 end
 
---restart
+--Restart
+computer.setBootAddress(diskDriveAddress)
 computer.beep()
 computer.shutdown(true)
